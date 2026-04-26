@@ -1,7 +1,9 @@
-from rest_framework import viewsets, permissions, filters
+from rest_framework import viewsets, permissions, filters, generics
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.permissions import AllowAny
+from django.contrib.auth.models import User
 from .models import Product
-from .serializers import ProductSerializer
+from .serializers import ProductSerializer, RegisterSerializer
 from .permissions import IsOwnerOrReadOnly
 
 class ProductViewSet(viewsets.ModelViewSet):
@@ -17,3 +19,7 @@ class ProductViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
 
+class RegisterView(generics.CreateAPIView):
+    queryset = User.objects.all()
+    permission_classes = (AllowAny,)
+    serializer_class = RegisterSerializer
