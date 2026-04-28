@@ -1,14 +1,27 @@
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from django.contrib.auth.models import User
-from .models import Product
+from .models import Product, Review
+from django.db.models import Avg
 
 class ProductSerializer(serializers.ModelSerializer):
     owner = serializers.ReadOnlyField(source='owner.username')
+    average_rating = serializers.SerializerMethodField()
+    reviews_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
-        fields = '__all__'
+        fields = ['id', 'name', 'price', 'description', 'average_rating', 'reviews_count', 'image', 'owner']
+        read_only_fields = ['owner']
+
+    def get_average_rating(self, obj):
+        result = obj.reviews.aggregate(Avg('rating'))
+        if result['rating__avg'] is None:
+            return 0.0
+        return round(result['rating__avg'], 1)
+
+    def get_reviews_count(self, obj):
+        return obj.reviews.count()
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -31,3 +44,11 @@ class RegisterSerializer(serializers.ModelSerializer):
             last_name=validated_data.get('last_name', ''),
         )
         return user
+
+class ReviewSerializer(serializers.ModelSerializer):
+    author_name = serializers.ReadOnlyField(source='user.username')
+
+    class Meta:
+        model = Review
+        fields = ['id', 'product', 'user', 'author_name', 'rating', 'text', 'created_at']
+        read_only_fields = ['user']

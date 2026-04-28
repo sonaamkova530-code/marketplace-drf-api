@@ -2,10 +2,9 @@ from rest_framework import viewsets, permissions, filters, generics
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.permissions import AllowAny
 from django.contrib.auth.models import User
-from .models import Product
-from .serializers import ProductSerializer, RegisterSerializer
+from .models import Product, Review
+from .serializers import ProductSerializer, RegisterSerializer, ReviewSerializer
 from .permissions import IsOwnerOrReadOnly
-
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
@@ -23,3 +22,11 @@ class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
     permission_classes = (AllowAny,)
     serializer_class = RegisterSerializer
+
+class ReviewViewSet(viewsets.ModelViewSet):
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
