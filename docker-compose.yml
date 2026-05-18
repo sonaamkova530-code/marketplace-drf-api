@@ -17,7 +17,8 @@ services:
     depends_on:
       - db
     volumes:
-      - ${PWD}/media:/app/media
+      - .:/app
+      - ./media:/app/media
 
 volumes:
   postgres_data:
