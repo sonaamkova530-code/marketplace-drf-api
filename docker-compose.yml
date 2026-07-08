@@ -13,12 +13,12 @@ services:
     build: .
     ports:
       - "8000:8000"
+    restart: on-failure
     command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     depends_on:
       - db
     volumes:
       - .:/app
-      - ./media:/app/media
 
 volumes:
   postgres_data:
